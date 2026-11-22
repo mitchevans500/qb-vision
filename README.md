@@ -6,4 +6,4 @@ One page, no accounts, no tracking, no network requests after it is installed. P
 
 Play: open the page, then use Share > Add to Home Screen. Open the new icon once while online; after that it plays with no connection.
 
-Build 2026.11.22-11c253. Fonts: Graduate and Lexend (SIL Open Font License 1.1).
+Build 2026.11.22-7f31b6. Fonts: Graduate and Lexend (SIL Open Font License 1.1).

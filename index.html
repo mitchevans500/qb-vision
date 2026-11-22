@@ -1090,9 +1090,13 @@ if (typeof module !== 'undefined') module.exports = Reads;
     let ctx = null;
     const ac = () => {
       if (!save.sound) return null;
-      try { ctx = ctx || new (window.AudioContext || window.webkitAudioContext)(); if (ctx.state === 'suspended') ctx.resume(); } catch (e) { ctx = null; }
+      try { ctx = ctx || new (window.AudioContext || window.webkitAudioContext)(); revive(); } catch (e) { ctx = null; }
       return ctx;
     };
+    // iPad parks the audio engine as 'interrupted' (not 'suspended') after a lock or an app switch; restart from any state
+    const revive = () => { if (ctx && ctx.state !== 'running') { try { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); } catch (e) { /* stays quiet */ } } };
+    document.addEventListener('pointerdown', revive, true);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) revive(); });
     function tone(f, at, dur, type, g, f2) {
       const c = ac(); if (!c) return;
       const o = c.createOscillator(), a = c.createGain(), t = c.currentTime + at;
@@ -1777,7 +1781,7 @@ if (typeof module !== 'undefined') module.exports = Reads;
     else if (screen === 'home' && !$('#learn').classList.contains('on')) { updateDemo(dt); drawDemo(); }
     requestAnimationFrame(frame);
   }
-  const ro = new ResizeObserver(() => { const s = $('#app').dataset.screen; if (s === 'play') sizeField(); if (s === 'home') sizeDemo(); });
+  const ro = new ResizeObserver(() => requestAnimationFrame(() => { const s = $('#app').dataset.screen; if (s === 'play') sizeField(); if (s === 'home') sizeDemo(); }));
   ro.observe($('#fieldWrap')); ro.observe($('.home-demo'));
   window.addEventListener('resize', () => { sizeField(); sizeDemo(); });
 
@@ -1797,7 +1801,7 @@ if (typeof module !== 'undefined') module.exports = Reads;
    of the game on the device, then says plainly on the home screen whether that copy is really there. */
 (function () {
   'use strict';
-  const BUILD = '2026.11.22-11c253';
+  const BUILD = '2026.11.22-7f31b6';
   const chip = document.getElementById('offline'), about = document.getElementById('about');
   const ua = navigator.userAgent;
   const phone = /iPhone|iPod/.test(ua);

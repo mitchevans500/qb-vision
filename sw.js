@@ -1,6 +1,6 @@
 /* QB Vision service worker: keeps a complete copy of the game on the device so it plays with no connection.
    Every file comes from this same folder. Nothing is fetched from anywhere else and nothing is sent anywhere. */
-const BUILD = '2026.11.22-11c253';
+const BUILD = '2026.11.22-7f31b6';
 const CACHE = 'qb-vision-' + BUILD;
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 
@@ -9,7 +9,8 @@ self.addEventListener('install', (event) => {
     const cache = await caches.open(CACHE);
     // all or nothing: a half-saved game must never count as installed
     await Promise.all(FILES.map(async (f) => {
-      const res = await fetch(new Request(f, { cache: 'reload' }));
+      // the build tag in the address makes the host's own cache hand over this build's file, never the previous one
+      const res = await fetch(new Request(f + '?v=' + BUILD, { cache: 'reload' }));
       if (!res.ok || res.redirected) throw new Error('could not save ' + f);
       await cache.put(f, res);
     }));
